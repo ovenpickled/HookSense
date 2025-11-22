@@ -1,8 +1,18 @@
 from fastapi import FastAPI, Request, BackgroundTasks, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from .worker import process_review
 import os
 
 app = FastAPI(title="AI Code Reviewer API")
+
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def read_root():
