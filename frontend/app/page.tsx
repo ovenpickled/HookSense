@@ -1,6 +1,23 @@
-import React from 'react';
+"use client";
+import React, { useEffect, useState } from 'react';
 
 export default function Home() {
+  const [metrics, setMetrics] = useState({ total_reviews: 0, issues_found: 0, avg_review_time: "0s" });
+  const [reviews, setReviews] = useState([]);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+  useEffect(() => {
+    fetch(`${apiUrl}/metrics`)
+      .then(res => res.json())
+      .then(data => setMetrics(data))
+      .catch(err => console.error("Failed to fetch metrics", err));
+
+    fetch(`${apiUrl}/reviews`)
+      .then(res => res.json())
+      .then(data => setReviews(data))
+      .catch(err => console.error("Failed to fetch reviews", err));
+  }, []);
+
   return (
     <main className="flex min-h-screen flex-col items-center p-24 bg-gray-900 text-white">
       <h1 className="text-4xl font-bold mb-8">AI Code Reviewer Dashboard</h1>
@@ -9,15 +26,15 @@ export default function Home() {
         {/* Metrics Cards */}
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
           <h2 className="text-xl font-semibold mb-2">Total Reviews</h2>
-          <p className="text-4xl font-bold text-blue-400">124</p>
+          <p className="text-4xl font-bold text-blue-400">{metrics.total_reviews}</p>
         </div>
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
           <h2 className="text-xl font-semibold mb-2">Issues Found</h2>
-          <p className="text-4xl font-bold text-red-400">45</p>
+          <p className="text-4xl font-bold text-red-400">{metrics.issues_found}</p>
         </div>
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
           <h2 className="text-xl font-semibold mb-2">Avg. Review Time</h2>
-          <p className="text-4xl font-bold text-green-400">1.2s</p>
+          <p className="text-4xl font-bold text-green-400">{metrics.avg_review_time}</p>
         </div>
 
         {/* Recent Activity */}
@@ -34,24 +51,21 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-gray-700/50">
-                  <td className="py-2">owner/repo-a</td>
-                  <td className="py-2">#42</td>
-                  <td className="py-2 text-green-400">Completed</td>
-                  <td className="py-2">2023-10-27</td>
-                </tr>
-                <tr className="border-b border-gray-700/50">
-                  <td className="py-2">owner/repo-b</td>
-                  <td className="py-2">#15</td>
-                  <td className="py-2 text-yellow-400">Pending</td>
-                  <td className="py-2">2023-10-27</td>
-                </tr>
-                <tr>
-                  <td className="py-2">owner/repo-a</td>
-                  <td className="py-2">#41</td>
-                  <td className="py-2 text-red-400">Failed</td>
-                  <td className="py-2">2023-10-26</td>
-                </tr>
+                {reviews.map((review: any, i) => (
+                  <tr key={i} className="border-b border-gray-700/50">
+                    <td className="py-2">{review.repository}</td>
+                    <td className="py-2">#{review.pr_number}</td>
+                    <td className={`py-2 ${review.status === 'completed' ? 'text-green-400' : 'text-yellow-400'}`}>
+                      {review.status}
+                    </td>
+                    <td className="py-2">{review.date}</td>
+                  </tr>
+                ))}
+                {reviews.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="py-4 text-center text-gray-500">No reviews yet</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

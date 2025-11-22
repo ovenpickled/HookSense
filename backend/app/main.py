@@ -53,3 +53,37 @@ def submit_feedback(feedback: Feedback):
     return {"message": "Feedback received"}
 
 
+from sqlalchemy.orm import Session
+from fastapi import Depends
+from .database import get_db
+from .models import Review, PullRequest as PRModel
+
+@app.get("/metrics")
+def get_metrics(db: Session = Depends(get_db)):
+    total_reviews = db.query(Review).count()
+    # Simplified issues count (assuming JSON suggestions list)
+    # In real app, we'd query inside the JSON or have a separate counter
+    issues_found = 0 
+    reviews = db.query(Review).all()
+    for r in reviews:
+        if r.suggestions:
+            issues_found += len(r.suggestions)
+            
+    return {
+        "total_reviews": total_reviews,
+        "issues_found": issues_found,
+        "avg_review_time": "1.2s" # Placeholder for now
+    }
+
+@app.get("/reviews")
+def get_recent_reviews(limit: int = 5, db: Session = Depends(get_db)):
+    reviews = db.query(Review).order_by(Review.created_at.desc()).limit(limit).all()
+    result = []
+    for r in reviews:
+        result.append({
+            "repository": r.pull_request.repository.name if r.pull_request and r.pull_request.repository else "unknown",
+            "pr_number": r.pull_request.pr_number if r.pull_request else 0,
+            "status": r.status,
+            "date": r.created_at.strftime("%Y-%m-%d")
+        })
+    return result
