@@ -13,15 +13,9 @@ services:
           name: ai-code-reviewer-db
           property: connectionString
       - key: CELERY_BROKER_URL
-        fromService:
-          type: redis
-          name: ai-code-reviewer-redis
-          property: connectionString
+        sync: false
       - key: CELERY_RESULT_BACKEND
-        fromService:
-          type: redis
-          name: ai-code-reviewer-redis
-          property: connectionString
+        sync: false
 
   - type: worker
     name: ai-code-reviewer-worker
@@ -37,15 +31,9 @@ services:
           name: ai-code-reviewer-db
           property: connectionString
       - key: CELERY_BROKER_URL
-        fromService:
-          type: redis
-          name: ai-code-reviewer-redis
-          property: connectionString
+        sync: false
       - key: CELERY_RESULT_BACKEND
-        fromService:
-          type: redis
-          name: ai-code-reviewer-redis
-          property: connectionString
+        sync: false
 
 databases:
   - name: ai-code-reviewer-db
