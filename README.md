@@ -1,4 +1,4 @@
-# 🤖 AI Code Reviewer
+# 🤖 HookSense - AI Code Reviewer
 
 > An intelligent, automated code review system powered by LLMs that integrates seamlessly with GitHub to provide instant, high-quality code reviews on every pull request.
 
